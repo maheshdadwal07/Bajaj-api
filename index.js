@@ -19,6 +19,16 @@ function isPrime(num) {
   return true;
 }
 
+function gcd(a, b) {
+  while (b !== 0) {
+    let temp = b;
+    b = a % b;
+    a = temp;
+  }
+  return a;
+}
+
+
 app.get("/health", (req, res) => {
   res.status(200).json({
     is_success: true,
@@ -86,7 +96,32 @@ app.post("/bfhl", (req, res) => {
   });
 }
 
+ else  if (key === "hcf") {
+  const arr = body.hcf;
+
+  if (!Array.isArray(arr) || arr.length === 0) {
+    return res.status(400).json({
+      is_success: false,
+      official_email: "mahesh0562.be23@chitkara.edu.in",
+      error: "HCF input must be a non-empty array"
+    });
+  }
+
+  let result = arr[0];
+
+  for (let i = 1; i < arr.length; i++) {
+    result = gcd(result, arr[i]);
+  }
+
+  return res.status(200).json({
+    is_success: true,
+    official_email: "mahesh0562.be23@chitkara.edu.in",
+    data: result
+  });
+}
    
+
+
     return res.status(400).json({
       is_success: false,
       official_email: "mahesh0562.be23@chitkara.edu.in",
