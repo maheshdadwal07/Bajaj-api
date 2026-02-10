@@ -1,7 +1,6 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const axios = require("axios");
-const { GoogleGenAI } = require("@google/genai");
 
 dotenv.config();
 
@@ -10,17 +9,12 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
 
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY
-});
+/* ---------- Helper Functions ---------- */
 
 function isPrime(num) {
   if (num <= 1) return false;
-
   for (let i = 2; i < num; i++) {
-    if (num % i === 0) {
-      return false;
-    }
+    if (num % i === 0) return false;
   }
   return true;
 }
@@ -38,6 +32,7 @@ function lcm(a, b) {
   return Math.abs(a * b) / gcd(a, b);
 }
 
+/* ---------- Health API ---------- */
 
 app.get("/health", (req, res) => {
   res.status(200).json({
@@ -45,6 +40,8 @@ app.get("/health", (req, res) => {
     official_email: "mahesh0562.be23@chitkara.edu.in"
   });
 });
+
+/* ---------- BFHL API ---------- */
 
 app.post("/bfhl", async (req, res) => {
   try {
@@ -61,7 +58,8 @@ app.post("/bfhl", async (req, res) => {
 
     const key = keys[0];
 
-       if (key === "fibonacci") {
+    /* ---------- Fibonacci ---------- */
+    if (key === "fibonacci") {
       const n = body.fibonacci;
 
       if (typeof n !== "number" || n < 1) {
@@ -84,77 +82,79 @@ app.post("/bfhl", async (req, res) => {
       });
     }
 
-   else if (key === "prime") {
-  const arr = body.prime;
+    /* ---------- Prime ---------- */
+    if (key === "prime") {
+      const arr = body.prime;
 
-  if (!Array.isArray(arr)) {
-    return res.status(400).json({
-      is_success: false,
-      official_email: "mahesh0562.be23@chitkara.edu.in",
-      error: "Prime input must be an array"
-    });
-  }
+      if (!Array.isArray(arr)) {
+        return res.status(400).json({
+          is_success: false,
+          official_email: "mahesh0562.be23@chitkara.edu.in",
+          error: "Prime input must be an array"
+        });
+      }
 
-  const primes = arr.filter((num) => {
-    return typeof num === "number" && isPrime(num);
-  });
+      const primes = arr.filter(
+        (num) => typeof num === "number" && isPrime(num)
+      );
 
-  return res.status(200).json({
-    is_success: true,
-    official_email: "mahesh0562.be23@chitkara.edu.in",
-    data: primes
-  });
-}
+      return res.status(200).json({
+        is_success: true,
+        official_email: "mahesh0562.be23@chitkara.edu.in",
+        data: primes
+      });
+    }
 
- else  if (key === "hcf") {
-  const arr = body.hcf;
+    /* ---------- HCF ---------- */
+    if (key === "hcf") {
+      const arr = body.hcf;
 
-  if (!Array.isArray(arr) || arr.length === 0) {
-    return res.status(400).json({
-      is_success: false,
-      official_email: "mahesh0562.be23@chitkara.edu.in",
-      error: "HCF input must be a non-empty array"
-    });
-  }
+      if (!Array.isArray(arr) || arr.length === 0) {
+        return res.status(400).json({
+          is_success: false,
+          official_email: "mahesh0562.be23@chitkara.edu.in",
+          error: "HCF input must be a non-empty array"
+        });
+      }
 
-  let result = arr[0];
+      let result = arr[0];
+      for (let i = 1; i < arr.length; i++) {
+        result = gcd(result, arr[i]);
+      }
 
-  for (let i = 1; i < arr.length; i++) {
-    result = gcd(result, arr[i]);
-  }
+      return res.status(200).json({
+        is_success: true,
+        official_email: "mahesh0562.be23@chitkara.edu.in",
+        data: result
+      });
+    }
 
-  return res.status(200).json({
-    is_success: true,
-    official_email: "mahesh0562.be23@chitkara.edu.in",
-    data: result
-  });
-}
-   
-else if (key === "lcm") {
-  const arr = body.lcm;
+    /* ---------- LCM ---------- */
+    if (key === "lcm") {
+      const arr = body.lcm;
 
-  if (!Array.isArray(arr) || arr.length === 0) {
-    return res.status(400).json({
-      is_success: false,
-      official_email: "mahesh0562.be23@chitkara.edu.in",
-      error: "LCM input must be a non-empty array"
-    });
-  }
+      if (!Array.isArray(arr) || arr.length === 0) {
+        return res.status(400).json({
+          is_success: false,
+          official_email: "mahesh0562.be23@chitkara.edu.in",
+          error: "LCM input must be a non-empty array"
+        });
+      }
 
-  let result = arr[0];
+      let result = arr[0];
+      for (let i = 1; i < arr.length; i++) {
+        result = lcm(result, arr[i]);
+      }
 
-  for (let i = 1; i < arr.length; i++) {
-    result = lcm(result, arr[i]);
-  }
+      return res.status(200).json({
+        is_success: true,
+        official_email: "mahesh0562.be23@chitkara.edu.in",
+        data: result
+      });
+    }
 
-  return res.status(200).json({
-    is_success: true,
-    official_email: "mahesh0562.be23@chitkara.edu.in",
-    data: result
-  });
-}
-
-else if (key === "AI") {
+    /* ---------- AI ---------- */
+    if (key === "AI") {
       const question = body.AI;
 
       if (typeof question !== "string" || question.trim().length === 0) {
@@ -166,35 +166,36 @@ else if (key === "AI") {
       }
 
       try {
-      const response = await ai.models.generateContent({
-  model: "gemini-3-flash-preview",
-  contents: `Answer in ONE WORD only. No explanation.\nQuestion: ${question}`
-});
+        const response = await axios.post(
+          "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent",
+          {
+            contents: [
+              {
+                parts: [
+                  {
+                    text: `Answer in ONE WORD only.\nQuestion: ${question}`
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            params: {
+              key: process.env.GEMINI_API_KEY
+            }
+          }
+        );
 
+        const text =
+          response.data.candidates[0].content.parts[0].text;
 
-        const text = response.text;
-
-        if (!text) {
-          return res.status(500).json({
-            is_success: false,
-            official_email: "mahesh0562.be23@chitkara.edu.in",
-            error: "AI returned empty response"
-          });
-        }
-
-        let oneWord = text
-  .replace(/[^a-zA-Z ]/g, "")
-  .split(" ")
-  .find(word => word.length > 3);
-
-
+        const oneWord = text.trim().split(/\s+/)[0];
 
         return res.status(200).json({
           is_success: true,
           official_email: "mahesh0562.be23@chitkara.edu.in",
           data: oneWord
         });
-
       } catch (err) {
         return res.status(500).json({
           is_success: false,
@@ -204,6 +205,7 @@ else if (key === "AI") {
       }
     }
 
+    /* ---------- Unsupported Key ---------- */
     return res.status(400).json({
       is_success: false,
       official_email: "mahesh0562.be23@chitkara.edu.in",
@@ -219,10 +221,8 @@ else if (key === "AI") {
   }
 });
 
-
-
+/* ---------- Start Server ---------- */
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
