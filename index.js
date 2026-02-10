@@ -1,5 +1,7 @@
 const express = require("express");
 const dotenv = require("dotenv");
+const axios = require("axios");
+const { GoogleGenAI } = require("@google/genai");
 
 dotenv.config();
 
@@ -7,6 +9,10 @@ const app = express();
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
+
+const ai = new GoogleGenAI({
+  apiKey: process.env.GEMINI_API_KEY
+});
 
 function isPrime(num) {
   if (num <= 1) return false;
@@ -40,7 +46,7 @@ app.get("/health", (req, res) => {
   });
 });
 
-app.post("/bfhl", (req, res) => {
+app.post("/bfhl", async (req, res) => {
   try {
     const body = req.body;
     const keys = Object.keys(body);
@@ -148,6 +154,55 @@ else if (key === "lcm") {
   });
 }
 
+else if (key === "AI") {
+      const question = body.AI;
+
+      if (typeof question !== "string" || question.trim().length === 0) {
+        return res.status(400).json({
+          is_success: false,
+          official_email: "mahesh0562.be23@chitkara.edu.in",
+          error: "AI input must be a non-empty string"
+        });
+      }
+
+      try {
+      const response = await ai.models.generateContent({
+  model: "gemini-3-flash-preview",
+  contents: `Answer in ONE WORD only. No explanation.\nQuestion: ${question}`
+});
+
+
+        const text = response.text;
+
+        if (!text) {
+          return res.status(500).json({
+            is_success: false,
+            official_email: "mahesh0562.be23@chitkara.edu.in",
+            error: "AI returned empty response"
+          });
+        }
+
+        let oneWord = text
+  .replace(/[^a-zA-Z ]/g, "")
+  .split(" ")
+  .find(word => word.length > 3);
+
+
+
+        return res.status(200).json({
+          is_success: true,
+          official_email: "mahesh0562.be23@chitkara.edu.in",
+          data: oneWord
+        });
+
+      } catch (err) {
+        return res.status(500).json({
+          is_success: false,
+          official_email: "mahesh0562.be23@chitkara.edu.in",
+          error: "AI service failed"
+        });
+      }
+    }
 
     return res.status(400).json({
       is_success: false,
@@ -170,3 +225,4 @@ else if (key === "lcm") {
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
