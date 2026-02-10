@@ -8,6 +8,16 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
 
+function isPrime(num) {
+  if (num <= 1) return false;
+
+  for (let i = 2; i < num; i++) {
+    if (num % i === 0) {
+      return false;
+    }
+  }
+  return true;
+}
 
 app.get("/health", (req, res) => {
   res.status(200).json({
@@ -53,6 +63,28 @@ app.post("/bfhl", (req, res) => {
         data: fib.slice(0, n)
       });
     }
+
+   else if (key === "prime") {
+  const arr = body.prime;
+
+  if (!Array.isArray(arr)) {
+    return res.status(400).json({
+      is_success: false,
+      official_email: "mahesh0562.be23@chitkara.edu.in",
+      error: "Prime input must be an array"
+    });
+  }
+
+  const primes = arr.filter((num) => {
+    return typeof num === "number" && isPrime(num);
+  });
+
+  return res.status(200).json({
+    is_success: true,
+    official_email: "mahesh0562.be23@chitkara.edu.in",
+    data: primes
+  });
+}
 
    
     return res.status(400).json({
