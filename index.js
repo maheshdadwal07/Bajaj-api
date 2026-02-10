@@ -31,20 +31,46 @@ app.post("/bfhl", (req, res) => {
 
     const key = keys[0];
 
-    res.status(200).json({
-      is_success: true,
+       if (key === "fibonacci") {
+      const n = body.fibonacci;
+
+      if (typeof n !== "number" || n < 1) {
+        return res.status(400).json({
+          is_success: false,
+          official_email: "mahesh0562.be23@chitkara.edu.in",
+          error: "Invalid fibonacci input"
+        });
+      }
+
+      let fib = [0, 1];
+      for (let i = 2; i < n; i++) {
+        fib.push(fib[i - 1] + fib[i - 2]);
+      }
+
+      return res.status(200).json({
+        is_success: true,
+        official_email: "mahesh0562.be23@chitkara.edu.in",
+        data: fib.slice(0, n)
+      });
+    }
+
+   
+    return res.status(400).json({
+      is_success: false,
       official_email: "mahesh0562.be23@chitkara.edu.in",
-      data: `Received key: ${key}`
+      error: "Unsupported key"
     });
 
   } catch (err) {
-    res.status(500).json({
+    return res.status(500).json({
       is_success: false,
       official_email: "mahesh0562.be23@chitkara.edu.in",
       error: "Server error"
     });
   }
 });
+
+
 
 
 app.listen(PORT, () => {
