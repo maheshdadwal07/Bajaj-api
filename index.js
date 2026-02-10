@@ -28,6 +28,10 @@ function gcd(a, b) {
   return a;
 }
 
+function lcm(a, b) {
+  return Math.abs(a * b) / gcd(a, b);
+}
+
 
 app.get("/health", (req, res) => {
   res.status(200).json({
@@ -120,6 +124,29 @@ app.post("/bfhl", (req, res) => {
   });
 }
    
+else if (key === "lcm") {
+  const arr = body.lcm;
+
+  if (!Array.isArray(arr) || arr.length === 0) {
+    return res.status(400).json({
+      is_success: false,
+      official_email: "mahesh0562.be23@chitkara.edu.in",
+      error: "LCM input must be a non-empty array"
+    });
+  }
+
+  let result = arr[0];
+
+  for (let i = 1; i < arr.length; i++) {
+    result = lcm(result, arr[i]);
+  }
+
+  return res.status(200).json({
+    is_success: true,
+    official_email: "mahesh0562.be23@chitkara.edu.in",
+    data: result
+  });
+}
 
 
     return res.status(400).json({
